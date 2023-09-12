@@ -1,0 +1,11 @@
+#Descending order of months in 2022 where highest gas fees were given to miners
+
+WITH temptable AS (
+ SELECT `hash`, ROUND(receipt_gas_used*((gas_price/1000000000)*0.000000001),18) AS gas_fees, block_timestamp, FORMAT_DATE('%b %Y', date_trunc(CAST(block_timestamp AS DATE), MONTH)) AS month,
+ Row_number() over (partition by date_trunc(CAST(block_timestamp AS DATE), MONTH) order by ROUND(receipt_gas_used*((gas_price/1000000000)*0.000000001),18) desc) AS rank
+ FROM `table-name` WHERE DATE(block_timestamp) >= '2022-01-01' AND  
+ DATE(block_timestamp) < '2023-01-01'
+ ORDER BY EXTRACT(MONTH FROM(DATE(block_timestamp))) ASC )
+
+
+SELECT * FROM temptable WHERE rank =1 ORDER BY temptable.gas_fees DESC
