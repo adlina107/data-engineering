@@ -1,0 +1,11 @@
+# Top 10 ETH transactions per month in 2022
+
+WITH temptable AS (
+ SELECT `hash`, ROUND(value/1000000000000000000, 2) AS ETHvalue, block_timestamp, FORMAT_DATE('%b %Y', date_trunc(CAST(block_timestamp AS DATE), MONTH)) AS month,
+ Row_number() over (partition by date_trunc(CAST(block_timestamp AS DATE), MONTH) order by value desc) AS rank
+ FROM `table-name`
+ WHERE DATE(block_timestamp) >= '2022-01-01' AND DATE(block_timestamp) < '2023-01-01' AND value !=0
+ ORDER BY EXTRACT(MONTH FROM(DATE(block_timestamp))) ASC
+)
+
+SELECT * FROM temptable WHERE rank <=10
