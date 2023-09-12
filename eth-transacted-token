@@ -1,0 +1,8 @@
+#List of top 10 most transacted tokens by transaction count in 2022
+
+WITH temptable AS (SELECT
+symbol, COUNT(*) AS rowaffected,
+ROW_NUMBER() OVER(ORDER BY COUNT(*) DESC) AS RANK,
+FROM `table-name` WHERE symbol !='null' AND symbol !='' AND symbol !='TST' AND NOT lower(name) LIKE '%test%' AND DATE(block_timestamp) >= '2022-01-01' AND DATE(block_timestamp) < '2023-01-01' GROUP BY symbol)
+
+SELECT * FROM temptable ORDER BY temptable.rowaffected DESC LIMIT 10
