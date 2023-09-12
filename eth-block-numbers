@@ -1,0 +1,5 @@
+# List of top 10 block numbers with the highest total volume of ETH transactions in 2022
+
+SELECT
+ROW_NUMBER() OVER(ORDER BY transaction_count DESC) AS RANK,
+timestamp AS date_block, number as block_number, `hash`, transaction_count FROM `table-name` WHERE DATE(timestamp) >= '2022-01-01' AND DATE(timestamp) < '2023-01-01' ORDER BY transaction_count DESC LIMIT 10
