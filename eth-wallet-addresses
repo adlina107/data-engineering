@@ -1,0 +1,77 @@
+#List of top 10 wallet addresses with the highest number of monthly transactions per month in 2022
+
+WITH finaloutertable AS (
+WITH myoutertable AS (
+WITH trytable1 AS (
+
+
+--TOP 10 from_addresses with most number of transactions monthly in 2022
+WITH newtable AS (
+WITH anothertable AS (
+WITH temptable AS (
+-- This select statement groups the rows by month in ascending order from Jan to Dec
+SELECT from_address, block_timestamp, EXTRACT(MONTH FROM (CAST(block_timestamp AS DATE))) AS month,
+FROM `table-name` WHERE DATE(block_timestamp) >= '2022-01-01' AND DATE(block_timestamp) < '2023-01-01' ORDER BY EXTRACT(MONTH FROM(DATE(block_timestamp))) ASC
+)
+
+
+SELECT from_address, COUNT(*) AS number_of_transactions, temptable.month FROM temptable GROUP BY from_address, temptable.month ORDER BY number_of_transactions DESC
+)
+
+
+SELECT anothertable.from_address, anothertable.number_of_transactions, anothertable.month,
+ROW_NUMBER() OVER (PARTITION BY anothertable.month ORDER BY anothertable.number_of_transactions DESC) AS rank FROM anothertable
+)
+
+
+SELECT * FROM newtable WHERE rank <=10 ORDER BY newtable.month
+),
+
+
+trytable2 AS (
+
+
+--TOP 10 to_addresses with most number of transactions monthly in 2022
+WITH newtable2 AS (
+WITH anothertable2 AS (
+WITH temptable2 AS (
+-- This select statement groups the rows by month in ascending order from Jan to Dec
+SELECT to_address, block_timestamp, EXTRACT(MONTH FROM (CAST(block_timestamp AS DATE))) AS month,
+FROM `table-name` WHERE DATE(block_timestamp) >= '2022-01-01' AND DATE(block_timestamp) < '2023-01-01' ORDER BY EXTRACT(MONTH FROM(DATE(block_timestamp))) ASC
+)
+
+
+SELECT to_address, COUNT(*) AS number_of_transactions, temptable2.month FROM temptable2 GROUP BY to_address, temptable2.month ORDER BY number_of_transactions DESC
+)
+
+
+SELECT anothertable2.to_address, anothertable2.number_of_transactions, anothertable2.month,
+ROW_NUMBER() OVER (PARTITION BY anothertable2.month ORDER BY anothertable2.number_of_transactions DESC) AS rank FROM anothertable2
+)
+
+
+SELECT * FROM newtable2 WHERE rank <=10 ORDER BY newtable2.month
+
+
+)
+
+
+--Union results from from_address table and to_address table
+SELECT trytable1.from_address, trytable1.number_of_transactions, trytable1.MONTH, trytable1.rank from trytable1
+UNION ALL
+SELECT trytable2.to_address, trytable2.number_of_transactions, trytable2.MONTH, trytable2.rank from trytable2
+
+
+)
+
+
+--order the results based on Month first and then in order of number of transactions (show top transaction regardless of 'from' or 'to' wallet addresses), then rank them 1 to 20 for each month
+SELECT myoutertable.from_address AS wallet_address, myoutertable.number_of_transactions, myoutertable.MONTH, myoutertable.rank,
+ROW_NUMBER() OVER (PARTITION BY myoutertable.month ORDER BY myoutertable.number_of_transactions DESC) AS combinedrank
+FROM myoutertable
+ORDER BY myoutertable.MONTH ASC, myoutertable.number_of_transactions DESC
+)
+
+
+--choose top 10 wallet addresses with the most transactions every month
+SELECT * FROM finaloutertable WHERE combinedrank <=10 ORDER BY finaloutertable.month
